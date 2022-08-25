@@ -1,0 +1,58 @@
+#!/bin/bash
+
+LARS_REPORTER_PATH="./lars_reporter"
+LARS_DNS_PATH="./lars_dns"
+LARS_LBAGENT_PATH="./lars_lb_agent"
+LARS_WEB_PATH="./lars_web"
+LARS_API_EXAMPLE_PATH="./api/cpp/example"
+
+usage() 
+{
+	echo ""
+	echo "==== 启动子系统===="
+	echo "Usage ./run_lars [report|dns|lbagent|web|test]"
+	echo
+
+	echo "==== 启动测试工具===="
+	echo "Usage ./run_lars test gethost ModID CmdID"
+	echo "Usage ./run_lars test getroute ModID CmdID"
+	echo "Usage ./run_lars test simulator ModID CmdID [errRate(0-10)] [queryCnt(0-99999)]]"
+	echo "Usage ./run_lars test qps [thread_num]"
+	echo
+}
+
+if [ "$1" = "test" ]; then
+	if [ "$2" = "gethost" ]; then
+		$PWD/$LARS_API_EXAMPLE_PATH/get_host $3 $4
+	elif [ "$2" = "getroute" ]; then
+		$PWD/$LARS_API_EXAMPLE_PATH/get_route $3 $4
+	elif [ "$2" = "simulator" ]; then
+		if [ $# -eq 4 ]; then	
+			$PWD/$LARS_API_EXAMPLE_PATH/simulator $3 $4
+		elif [ $# -eq 5 ]; then	
+			$PWD/$LARS_API_EXAMPLE_PATH/simulator $3 $4 $5
+		elif [ $# -eq 6 ]; then	
+			$PWD/$LARS_API_EXAMPLE_PATH/simulator $3 $4 $5 $6
+		else 
+			usage
+		fi
+	elif [ "$2" = "qps" ]; then
+		$PWD/$LARS_API_EXAMPLE_PATH/qps $3
+	fi
+elif [ "$1" = "reporter" ]; then
+	cd $LARS_REPORTER_PATH
+	./bin/lars_reporter
+elif [ "$1" = "dns" ]; then
+	cd $LARS_DNS_PATH
+	./bin/lars_dns
+elif [ "$1" = "lbagent" ]; then
+	cd $LARS_LBAGENT_PATH
+	./bin/lars_lb_agent
+elif [ "$1" = "web" ]; then
+	cd $LARS_WEB_PATH
+	./lars-web
+elif [ "$1" = "help" ]; then
+	usage
+else
+	usage
+fi

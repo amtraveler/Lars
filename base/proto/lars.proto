@@ -1,0 +1,96 @@
+syntax = "proto3";
+
+package lars;
+
+/* Lars 系统消息ID */
+enum MessageId
+{
+	ID_UNKONW               = 0; //prot3 enum第一个属性必须为0，用来占位
+	ID_GetRouteRequest      = 1; //Agent向Dns service请求一个Route的对应关系的消息ID
+	ID_GetRouteResponse     = 2; //Dns Service 回复给Agent的结果的消息ID
+	ID_ReportStatusRequest  = 3; //上报主机的调用结果的请求消息给Report Server的消息ID
+	ID_GetHostRequest       = 4; //API-->Agent API请求Agent host信息
+	ID_GetHostResponse      = 5; //Agent-->API Agent返回给API的一个可用的host信息
+	ID_ReportRequest        = 6; //API-->Agent上报结果请求
+	ID_API_GetRouteRequest  = 7; //API-->Agent 获取当前modid/cmdid全部的主机信息
+	ID_API_GetRouteResponse = 8; //Agent-->API 返回全部的主机信息
+}
+
+enum LarsRetCode
+{
+	RET_SUCC         = 0;
+	RET_OVERLOAD     = 1; //超载
+	RET_SYSTEM_ERROR = 2; //系统错误
+	RET_NOEXIST      = 3; //资源不存在
+
+}
+
+//定义一个主机的信息
+message HostInfo
+{
+	int32 ip = 1;
+	int32 port = 2;
+}
+
+//请求lars dns server GetRoute请求信息的消息内容
+message GetRouteRequest
+{
+	int32 modid = 1;
+	int32 cmdid = 2;
+}
+
+//dns给agent回复的消息内容
+message GetRouteResponse
+{
+	int32 modid = 1;
+	int32 cmdid = 2;
+	repeated HostInfo host = 3;
+}
+
+//一个主机的上报结果
+message HostCallResult
+{
+	int32 ip = 1;//主机的ip
+	int32 port = 2;//主机的port
+	uint32 succ = 3;//调度成功
+	uint32 err = 4;//调度失败
+	bool overload = 5;//是否过载
+}
+
+//agent上报主机调用结果给reporter模块
+message ReportStatusRequest
+{
+	int32 modid = 1;
+	int32 cmdid = 2;
+	int32 caller = 3;
+	repeated HostCallResult results = 4;
+	uint32 ts = 5;
+}
+
+//API请求Agent获取host信息（UDP）
+message GetHostRequest
+{
+	uint32 seq = 1;
+	int32 modid = 2;
+	int32 cmdid = 3;
+	
+}
+
+//Agent给API回复的host信息（UDP）
+message GetHostResponse
+{
+	uint32 seq = 1;
+	int32 modid = 2;
+	int32 cmdid = 3;
+	int32 retcode = 4;
+	HostInfo host = 5;
+}
+
+//API-->Agent的上报数据
+message ReportRequest
+{
+	int32 modid = 1;
+	int32 cmdid = 2;
+	HostInfo host = 3;
+	int32 retcode = 4;
+}
